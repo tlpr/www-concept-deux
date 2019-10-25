@@ -10,8 +10,8 @@
 class ApiFront
 {
 	
-	private $API_ADDRESS = 'http://127.0.0.1/api/v1/';
-	private $API_KEY = '';
+	private const API_ADDRESS = 'http://127.0.0.1/api/v1/';
+	private const API_KEY = '';
 
 	private function SendRequest($Http_Address, $Type, $Headers=0)
 	{
@@ -24,29 +24,33 @@ class ApiFront
 			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($Headers));
 			
 		$response = curl_exec($ch);
+		$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close($ch);
 		
-		return $response;
+		if ( $status != 200 )
+			return NULL;
+		
+		return json_decode($response, true);
 		
 	}
 
 
-	function GetUserInformation ($UserID, $ApiKey=0)
+	function GetUserInformation ($UserID, $ApiKey=self::API_KEY)
 	{
-		if (!$ApiKey) $ApiKey = $this->API_KEY;
+		//if (!$ApiKey) $ApiKey = $this->API_KEY;
 
 		
 	}
 
-	function ValidateCredentials($Username, $Password, $ApiKey=0)
+	function ValidateCredentials($Username, $Password, $ApiKey=self::API_KEY)
 	{
 		
-		if (!$ApiKey) $ApiKey = $this->API_KEY;
+		//if (!$ApiKey) $ApiKey = $this->API_KEY;
 		
-		$Address = $this->API_ADDRESS . "validate.php?act=credentials&username=$Username".
+		$Address = self::API_ADDRESS . "validate.php?act=credentials&username=$Username".
 		"&password=$Password&auth=$ApiKey";
 		
-		return $this->SendRequest($http_address, 'GET');
+		return $this->SendRequest($Address, 'GET');
 		
 	}
 
