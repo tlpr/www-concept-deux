@@ -48,12 +48,14 @@ class ApiFront
 		$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close($ch);
 		
-		if ( $status != 200 )
-			return NULL;
+		//if ( $status != 200 )
+		//	return NULL;
 		
-		return json_decode($response, true);
+		return $response;
+		//return json_decode($response, true);
 		
 	}
+
 
 	/////////////////////////////////////////
 	// USER MANAGEMENT
@@ -92,6 +94,15 @@ class ApiFront
 		
 	}
 	
+	function DeleteUser ($UserID, $ApiKey=self::API_KEY)
+	{
+		
+		$Address = self::API_ADDRESS . "user.php?id=$UserID&auth=$ApiKey";
+		return $this->SendRequest($Address, 'DELETE');
+		
+	}
+	
+	
 	/////////////////////////////////////////
 	// CREDENTIALS VALIDATION
 	
@@ -104,5 +115,90 @@ class ApiFront
 		return $this->SendRequest($Address, 'GET');
 		
 	}
+	
+	function ValidateTwoFactor ($UserID, $Token, $ApiKey=self::API_KEY)
+	{
+		
+		$Address = self::API_ADDRESS . "validate.php?act=totp&user_id=$UserID".
+		"&code=$Token&auth=$ApiKey";
+		
+		return $this->SendRequest($Address, 'GET');
+		
+	}
+	
+	
+	/////////////////////////////////////////
+	// ACCOUNT INVITES
+	
+	function GenerateInviteCode ($UserID, $ApiKey=self::API_KEY)
+	{
+		
+		$Address = self::API_ADDRESS . "invite.php?id=$UserID&auth=$ApiKey";
+		return $this->SendRequest($Address, 'POST');
+		
+	}
+	
+	// TODO: Always returns success for some reason. (API causes this)
+	function ValidateInviteCode ($Username, $Code, $ApiKey=self::API_KEY)
+	{
+		
+		$Address = self::API_ADDRESS . "invite.php?auth=$ApiKey";
+		$Headers = array(
+			'user_id' => $Username,
+			'code' => $Code
+		);
+		
+		return $this->SendRequest($Address, 'PUT', $Headers);
+		
+	}
+	
+	
+	/////////////////////////////////////////
+	// SONG MANAGEMENT
+	
+	function GetSongInformation ($SongID, $ApiKey=self::API_KEY)
+	{
+		
+		$Address = self::API_ADDRESS . "song.php?song_id=$SongID&auth=$ApiKey";
+		return $this->SendRequest($Address, 'GET');
+		
+	}
+	
+	function CreateSongEntry ($SongName, $AlbumTitle, $ApiKey=self::API_KEY)
+	{
+		
+		$Address = self::API_ADDRESS . "song.php?auth=$ApiKey";
+		$Headers = array(
+			'song_name' => $SongName,
+			'album_title' => $AlbumTitle
+		);
+		
+		return $this->SendRequest($Address, 'POST', $Headers);
+		
+	}
+	
+	// $SongIdentifier is either a number that symbolizes ID, or
+	// a string that symbolizes a full song title.
+	function RemoveSongEntry ($SongIdentifier, $ApiKey=self::API_KEY)
+	{
+		
+		if ( is_numeric($SongIdentifier) )
+		{
+			$Address = self::API_ADDRESS . 'song.php?format=by_id'.
+			"&id=$SongIdentifier&auth=$ApiKey";
+		}
+		else
+		{
+			$SongIdentifier = urlencode($SongIdentifier);
+			
+			$Address = self::API_ADDRESS . 'song.php?format=by_title'.
+			"&id=$SongIdentifier&auth=$ApiKey";
+		}
+		
+		return $this->SendRequest($Address, 'DELETE');
+		
+	}
+	
+	
 
 }
