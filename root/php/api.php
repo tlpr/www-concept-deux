@@ -11,7 +11,7 @@ class ApiFront
 {
 	
 	private const API_ADDRESS = 'http://127.0.0.1/api/v1/';
-	private const API_KEY = '';
+	private const API_KEY = '7ZmAlds9DCna9tlZ7bkd0fgh76134mlmijh8yD5';
 
 	// requires full URL to send request to, request type/method (GET/POST/PUT/DELETE)
 	// and optionally $Headers (in case if not using GET)
@@ -138,13 +138,12 @@ class ApiFront
 		
 	}
 	
-	// TODO: Always returns success for some reason. (API causes this)
-	function ValidateInviteCode ($Username, $Code, $ApiKey=self::API_KEY)
+	function ValidateInviteCode ($NewUserID, $Code, $ApiKey=self::API_KEY)
 	{
 		
 		$Address = self::API_ADDRESS . "invite.php?auth=$ApiKey";
 		$Headers = array(
-			'user_id' => $Username,
+			'user_id' => $NewUserID,
 			'code' => $Code
 		);
 		
@@ -199,6 +198,33 @@ class ApiFront
 		
 	}
 	
+	
+	/////////////////////////////////////////
+	// SONG LIKES
+	
+	function GetLikeRecord ($UserID, $SongID, $ApiKey=self::API_KEY)
+	{
+		
+		$Address = self::API_ADDRESS . "like.php?user_id=$UserID".
+		"&song_id=$SongID&auth=$ApiKey";
+		
+		return $this->SendRequest($Address, 'GET');
+		
+	}
+	
+	function AddSongStatus ($UserID, $SongID, $Status=1, $ApiKey=self::API_KEY)
+	{
+		
+		$Address = self::API_ADDRESS . "like.php?auth=$ApiKey";
+		$Headers = array(
+			'user_id' => $UserID,
+			'song_id' => $SongID,
+			'status'  => $Status, 
+		);
+		
+		return $this->SendRequest($Address, 'POST', $Headers);
+		
+	}
 	
 
 }
